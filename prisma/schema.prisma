@@ -12,3 +12,36 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id           String       @id @default(uuid())
+  email        String       @unique
+  name         String?
+  repositories Repository[]
+  Bucket       Bucket[]
+}
+
+model Repository {
+  id        String   @id @default(uuid())
+  name      String
+  price     Float
+  clonable  Boolean  @default(false)
+  owner     User     @relation(fields: [ownerId], references: [id])
+  ownerId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  buckets   Bucket?  @relation(fields: [bucketId], references: [id])
+  bucketId  String?
+}
+
+model Bucket {
+  id           String       @id @default(uuid())
+  name         String
+  price        Float
+  clonable     Boolean      @default(false)
+  owner        User         @relation(fields: [ownerId], references: [id])
+  ownerId      String
+  repositories Repository[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
