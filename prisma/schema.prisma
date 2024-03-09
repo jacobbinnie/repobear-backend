@@ -16,22 +16,29 @@ datasource db {
 model User {
   id           String       @id @default(uuid())
   email        String       @unique
-  name         String?
+  username     String
+  name         String
+  avatar       String?
   repositories Repository[]
-  Bucket       Bucket[]
+  buckets      Bucket[]
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @default(now()) @updatedAt
+  deletedAt    DateTime?
 }
 
 model Repository {
-  id        String   @id @default(uuid())
-  name      String
-  price     Float
-  clonable  Boolean  @default(false)
-  owner     User     @relation(fields: [ownerId], references: [id])
-  ownerId   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  buckets   Bucket?  @relation(fields: [bucketId], references: [id])
-  bucketId  String?
+  id         String      @id @default(uuid())
+  name       String
+  price      Float
+  clonable   Boolean     @default(false)
+  owner      User        @relation(fields: [ownerId], references: [id])
+  ownerId    String
+  buckets    Bucket?     @relation(fields: [bucketId], references: [id])
+  bucketId   String?
+  shareLinks ShareLink[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  deletedAt  DateTime?
 }
 
 model Bucket {
@@ -44,4 +51,16 @@ model Bucket {
   repositories Repository[]
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
+  deletedAt    DateTime?
+}
+
+model ShareLink {
+  id           String     @id @default(uuid())
+  link         String
+  expiry       DateTime?
+  repository   Repository @relation(fields: [repositoryId], references: [id])
+  repositoryId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  deletedAt    DateTime?
 }
