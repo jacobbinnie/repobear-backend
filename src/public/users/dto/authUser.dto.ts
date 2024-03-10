@@ -13,14 +13,6 @@ export class AuthUserDto extends Dto<AuthUserDto> {
 
   @ApiProperty()
   @IsString()
-  username: string;
-
-  @ApiProperty()
-  @IsString()
-  name: string;
-
-  @ApiProperty()
-  @IsString()
   @IsOptional()
   avatar?: string;
 }

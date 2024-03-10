@@ -6,6 +6,7 @@ import { CreateUserDto } from 'src/public/users/dto/createUser.dto';
 import { AuthUserDto } from 'src/public/users/dto/authUser.dto';
 import { LoginResDto } from './dto/loginResDto';
 import axios from 'axios';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -13,6 +14,15 @@ export class AuthService {
     private userService: UsersService,
     private jwtService: JwtService,
   ) {}
+
+  async validateUser(email: string, password: string) {
+    const user = await this.userService.findOneWithEmail(email);
+    if (user && (await bcrypt.compare(password, user.password))) {
+      const { password, ...result } = user;
+      return result;
+    }
+    return null;
+  }
 
   async login(user: User) {
     const payload = {
@@ -22,8 +32,6 @@ export class AuthService {
 
     const authUser = new AuthUserDto({
       id: user.id,
-      name: user.name,
-      username: user.username,
       email: user.email,
       avatar: user.avatar,
     });

@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma.service';
 import { JwtStrategy } from './strategies/jwt-strategy';
 import { RefreshJwtStrategy } from './strategies/refreshToken.strategy';
+import { LocalStrategy } from './strategies/local-strategy';
 
 @Module({
   controllers: [AuthController],
@@ -15,6 +16,7 @@ import { RefreshJwtStrategy } from './strategies/refreshToken.strategy';
     PrismaService,
     JwtStrategy,
     RefreshJwtStrategy,
+    LocalStrategy,
   ],
   imports: [
     JwtModule.register({
