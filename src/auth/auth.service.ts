@@ -4,7 +4,7 @@ import { User } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto } from 'src/public/users/dto/createUser.dto';
 import { AuthUserDto } from 'src/public/users/dto/authUser.dto';
-import { LoginResDto } from './dto/loginResDto';
+import { LoginResDto } from './dto/loginRes.dto';
 import axios from 'axios';
 import * as bcrypt from 'bcrypt';
 
@@ -33,7 +33,6 @@ export class AuthService {
     const authUser = new AuthUserDto({
       id: user.id,
       email: user.email,
-      avatar: user.avatar,
     });
 
     return new LoginResDto({

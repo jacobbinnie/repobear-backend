@@ -20,6 +20,7 @@ export class UsersService {
     const user = await this.prisma.user.findUnique({
       where: {
         id: userId,
+        deletedAt: null,
       },
     });
 
@@ -30,7 +31,6 @@ export class UsersService {
     return new AuthUserDto({
       id: user.id,
       email: user.email,
-      avatar: user.avatar,
     });
   }
 

@@ -1,8 +1,7 @@
-import { Controller, Logger, Post, UseGuards } from '@nestjs/common';
+import { Controller, Logger, Param, Post, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { ReqUser, ReqUserType } from 'src/auth/util/user.decorator';
+import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 import { AuthUserDto } from './dto/authUser.dto';
 
 @ApiTags('users')
@@ -16,8 +15,8 @@ export class UsersController {
 
   @ApiBearerAuth()
   @UseGuards(JwtGuard)
-  @Post('user')
-  async getUser(@ReqUser() user: ReqUserType): Promise<AuthUserDto> {
-    return this.usersService.getUser(user.userId.id);
+  @Post(':id')
+  async getUserById(@Param('id') id: string): Promise<AuthUserDto> {
+    return this.usersService.getUser(id);
   }
 }

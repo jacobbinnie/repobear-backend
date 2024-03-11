@@ -1,10 +1,12 @@
 import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UsersService } from 'src/public/users/users.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { CreateUserDto } from 'src/public/users/dto/createUser.dto';
 import { RefreshJwtGuard } from './guards/refresh-jwt-auth';
+import { JwtGuard } from './guards/jwt-auth.guard';
+import { LoginResDto } from './dto/loginRes.dto';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -16,7 +18,7 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req) {
+  async login(@Request() req): Promise<LoginResDto> {
     return await this.authService.login(req.user);
   }
 
@@ -31,6 +33,8 @@ export class AuthController {
     return await this.authService.refreshToken(req.user);
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JwtGuard)
   @Post('getGithubAccessToken')
   async getGithubAccessToken(@Body() { code }: { code: string }) {
     return await this.authService.getGithubAccessToken(code);
