@@ -36,7 +36,9 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(JwtGuard)
   @Post('getGithubAccessToken')
-  async getGithubAccessToken(@Body() { code }: { code: string }) {
+  async getGithubAccessToken(
+    @Body() { code }: { code: string },
+  ): Promise<string> {
     return await this.authService.getGithubAccessToken(code);
   }
 }

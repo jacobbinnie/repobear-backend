@@ -85,6 +85,6 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    return access_token;
+    return access_token as string;
   }
 }
