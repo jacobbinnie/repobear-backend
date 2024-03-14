@@ -1,17 +1,35 @@
+import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Dto } from 'src/lib/dto/Dto';
+import { RepositoryOwnerDto } from './repositoryOwner.dto';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class UserRepositoryDto extends Dto<UserRepositoryDto> {
+  @IsNumber()
+  @IsNotEmpty()
   id: number;
-  name: string;
-  description: string;
-  html_url: string;
-  default_branch: string;
-  clone_url: string;
-  owner: {
-    id: number;
-    login: string;
-    html_url: string;
-  };
-}
 
-export class UserRepositoriesDto extends Dto<UserRepositoryDto[]> {}
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  description: string;
+
+  @IsString()
+  @IsNotEmpty()
+  html_url: string;
+
+  @IsString()
+  @IsNotEmpty()
+  default_branch: string;
+
+  @IsString()
+  @IsNotEmpty()
+  clone_url: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ type: RepositoryOwnerDto })
+  owner: RepositoryOwnerDto;
+}

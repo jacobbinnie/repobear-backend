@@ -3,6 +3,7 @@ import axios from 'axios';
 import { PrismaService } from 'src/prisma.service';
 import { Endpoints } from '@octokit/types';
 import { UserRepositoryDto } from './dto/userRepository.dto';
+import { RepositoryOwnerDto } from './dto/repositoryOwner.dto';
 
 type ListUserReposResponse = Endpoints['GET /user/repos']['response'];
 @Injectable()
@@ -21,7 +22,7 @@ export class RepositoriesService {
       },
     );
 
-    const data = res.data.map((repo) => {
+    return res.data.map((repo) => {
       return new UserRepositoryDto({
         id: repo.id,
         name: repo.name,
@@ -29,14 +30,12 @@ export class RepositoriesService {
         description: repo.description,
         default_branch: repo.default_branch,
         html_url: repo.html_url,
-        owner: {
+        owner: new RepositoryOwnerDto({
           id: repo.owner.id,
           login: repo.owner.login,
           html_url: repo.owner.html_url,
-        },
+        }),
       });
     });
-
-    return data;
   }
 }
