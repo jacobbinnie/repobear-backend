@@ -1,13 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { Dto } from 'src/lib/dto/Dto';
 import { RepositoryOwnerDto } from './repositoryOwner.dto';
-import { AuthUserDto } from 'src/public/users/dto/authUser.dto';
+import { ApiProperty } from '@nestjs/swagger';
 
-export class UserRepositoryDto extends Dto<UserRepositoryDto> {
+export class GithubRepositoryDto extends Dto<GithubRepositoryDto> {
   @IsNumber()
   @IsNotEmpty()
-  id: string;
+  id: number;
 
   @IsString()
   @IsNotEmpty()
@@ -33,8 +32,4 @@ export class UserRepositoryDto extends Dto<UserRepositoryDto> {
   @IsNotEmpty()
   @ApiProperty({ type: RepositoryOwnerDto })
   owner: RepositoryOwnerDto;
-
-  @ApiProperty({ type: AuthUserDto })
-  @IsNotEmpty()
-  user: AuthUserDto;
 }

@@ -2,8 +2,10 @@ import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { PrismaService } from 'src/prisma.service';
 import { Endpoints } from '@octokit/types';
-import { UserRepositoryDto } from './dto/userRepository.dto';
+
 import { RepositoryOwnerDto } from './dto/repositoryOwner.dto';
+import { GithubRepositoryDto } from './dto/githubRepository.dto';
+import { ImportRepositoryDto } from './dto/importRepository.dto';
 
 type ListUserReposResponse = Endpoints['GET /user/repos']['response'];
 @Injectable()
@@ -23,7 +25,7 @@ export class RepositoriesService {
     );
 
     return res.data.map((repo) => {
-      return new UserRepositoryDto({
+      return new GithubRepositoryDto({
         id: repo.id,
         name: repo.name,
         clone_url: repo.clone_url,
@@ -37,5 +39,18 @@ export class RepositoriesService {
         }),
       });
     });
+  }
+
+  async importGithubRepositories({
+    accessToken,
+    repositories,
+  }: ImportRepositoryDto) {
+    repositories.forEach(async (repo) => {
+      console.log(`Generating SSH deploy key for ${repo}`);
+    });
+    // generate SSH deploy key per repository
+    // add deploy key to repository
+    // clone repository
+    // add repository to user
   }
 }
