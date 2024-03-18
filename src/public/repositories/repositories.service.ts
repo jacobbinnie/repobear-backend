@@ -61,28 +61,40 @@ export class RepositoriesService {
       throw error;
     }
 
-    const command = `ssh-keygen -t ed25519 -C "test@email.com" -f "${directoryPath}/key" -N pass`;
+    const command = `rm -rf ${directoryPath} && mkdir ${directoryPath} && ssh-keygen -t ed25519 -C "test@email.com" -f "${directoryPath}/key" -N pass && chmod -R 700 ${directoryPath}`;
 
-    console.log(command);
+    await new Promise<string>((resolve, reject) => {
+      exec(command, (error, stdout, stderr) => {
+        if (error) {
+          reject(error);
+        }
+        if (stderr) {
+          reject(stderr);
+        }
+        resolve(stdout);
+      });
+    });
 
-    // run command and return ssh key here
+    const extractedKey = await fsPromises.readFile(`${directoryPath}/key.pub`, {
+      encoding: 'utf-8',
+    });
 
-    return null;
+    return extractedKey;
   }
 
   async importGithubRepositories({
     accessToken,
     repositories,
   }: ImportRepositoryDto) {
+    const deployKeys = [];
+
     for (const repo of repositories) {
       console.log(`Generating SSH deploy key for ${repo}`);
       const deployKey = await this.generateSshKey();
       console.log(`Deploy key for ${repo}: ${deployKey}`);
+      deployKeys.push(deployKey);
     }
 
-    // generate SSH deploy key per repository
-    // add deploy key to repository
-    // clone repository
-    // add repository to user
+    return deployKeys;
   }
 }

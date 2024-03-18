@@ -27,7 +27,7 @@ export class RepositoriesController {
   async importGithubRepositories(
     @Body()
     { accessToken, repositories }: ImportRepositoryDto,
-  ): Promise<any> {
+  ): Promise<string[]> {
     return await this.repositoriesService.importGithubRepositories({
       accessToken,
       repositories,
