@@ -6,13 +6,17 @@ import { Endpoints } from '@octokit/types';
 import { RepositoryOwnerDto } from './dto/repositoryOwner.dto';
 import { GithubRepositoryDto } from './dto/githubRepository.dto';
 import { ImportRepositoryDto } from './dto/importRepository.dto';
+import { exec } from 'child_process';
+import { promises as fsPromises } from 'fs';
+import * as os from 'os';
+import * as path from 'path';
 
 type ListUserReposResponse = Endpoints['GET /user/repos']['response'];
 @Injectable()
 export class RepositoriesService {
   constructor(private prisma: PrismaService) {}
 
-  async getGithubUserRespositories(accessToken: string) {
+  async getGithubUserRepositories(accessToken: string) {
     const res: ListUserReposResponse = await axios.get(
       `https://api.github.com/user/repos`,
       {
@@ -41,13 +45,41 @@ export class RepositoriesService {
     });
   }
 
+  async generateSshKey(): Promise<string> {
+    const tempDir = os.tmpdir();
+    const directoryPath = path.join(tempDir, 'keys');
+
+    try {
+      // Create the directory if it doesn't exist
+      await fsPromises.mkdir(directoryPath, { recursive: true });
+
+      // Set permissions for the directory
+      await fsPromises.chmod(directoryPath, 0o700);
+    } catch (error) {
+      // Handle directory creation error
+      console.error('Error creating directory:', error);
+      throw error;
+    }
+
+    const command = `ssh-keygen -t ed25519 -C "test@email.com" -f "${directoryPath}/key" -N pass`;
+
+    console.log(command);
+
+    // run command and return ssh key here
+
+    return null;
+  }
+
   async importGithubRepositories({
     accessToken,
     repositories,
   }: ImportRepositoryDto) {
-    repositories.forEach(async (repo) => {
+    for (const repo of repositories) {
       console.log(`Generating SSH deploy key for ${repo}`);
-    });
+      const deployKey = await this.generateSshKey();
+      console.log(`Deploy key for ${repo}: ${deployKey}`);
+    }
+
     // generate SSH deploy key per repository
     // add deploy key to repository
     // clone repository
