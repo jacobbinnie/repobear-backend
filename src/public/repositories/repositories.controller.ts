@@ -4,6 +4,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from 'src/auth/guards/jwt-auth.guard';
 import { GithubRepositoryDto } from './dto/githubRepository.dto';
 import { ImportRepositoryDto } from './dto/importRepository.dto';
+import { ReqUser, ReqUserType } from 'src/auth/util/user.decorator';
 
 @ApiTags('repositories')
 @Controller('repositories')
@@ -25,12 +26,14 @@ export class RepositoriesController {
   @UseGuards(JwtGuard)
   @Post('importGithubRepositories')
   async importGithubRepositories(
+    @ReqUser() user: ReqUserType,
     @Body()
     { accessToken, repositories }: ImportRepositoryDto,
   ): Promise<string[]> {
     return await this.repositoriesService.importGithubRepositories({
       accessToken,
       repositories,
+      email: user.username,
     });
   }
 }

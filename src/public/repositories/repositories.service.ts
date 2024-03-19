@@ -5,13 +5,15 @@ import { Endpoints } from '@octokit/types';
 
 import { RepositoryOwnerDto } from './dto/repositoryOwner.dto';
 import { GithubRepositoryDto } from './dto/githubRepository.dto';
-import { ImportRepositoryDto } from './dto/importRepository.dto';
+import { ImportRepositoryExtendedDto } from './dto/importRepository.dto';
 import { exec } from 'child_process';
 import { promises as fsPromises } from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
 type ListUserReposResponse = Endpoints['GET /user/repos']['response'];
+type ListRepoKeysResponse =
+  Endpoints['GET /repos/{owner}/{repo}/keys']['response'];
 @Injectable()
 export class RepositoriesService {
   constructor(private prisma: PrismaService) {}
@@ -45,7 +47,7 @@ export class RepositoriesService {
     });
   }
 
-  async generateSshKey(): Promise<string> {
+  async generateSshKey({ email }: { email: string }): Promise<string> {
     const tempDir = os.tmpdir();
     const directoryPath = path.join(tempDir, 'keys');
 
@@ -61,7 +63,7 @@ export class RepositoriesService {
       throw error;
     }
 
-    const command = `rm -rf ${directoryPath} && mkdir ${directoryPath} && ssh-keygen -t ed25519 -C "test@email.com" -f "${directoryPath}/key" -N pass && chmod -R 700 ${directoryPath}`;
+    const command = `rm -rf ${directoryPath} && mkdir ${directoryPath} && ssh-keygen -t rsa -b 2048 -C ${email} -f "${directoryPath}/key" -N pass && chmod -R 700 ${directoryPath}`;
 
     await new Promise<string>((resolve, reject) => {
       exec(command, (error, stdout, stderr) => {
@@ -82,17 +84,51 @@ export class RepositoriesService {
     return extractedKey;
   }
 
+  async getDeployKeysForRepository({
+    githubAccessToken,
+    repository,
+    repositoryOwner,
+  }: {
+    githubAccessToken: string;
+    repository: string;
+    repositoryOwner: string;
+  }) {
+    const res: ListRepoKeysResponse = await axios.get(
+      `https://api.github.com/repos/${repositoryOwner}/${repository}/keys`,
+      {
+        headers: {
+          Accept: 'application/vnd.github+json',
+          Authorization: `Bearer ${githubAccessToken}`,
+          'X-GitHub-Api-Version': '2022-11-28',
+        },
+      },
+    );
+
+    return res.data;
+  }
+
   async importGithubRepositories({
     accessToken,
     repositories,
-  }: ImportRepositoryDto) {
+    email,
+  }: ImportRepositoryExtendedDto) {
     const deployKeys = [];
 
     for (const repo of repositories) {
-      console.log(`Generating SSH deploy key for ${repo}`);
-      const deployKey = await this.generateSshKey();
-      console.log(`Deploy key for ${repo}: ${deployKey}`);
-      deployKeys.push(deployKey);
+      const existingDeployKeys = await this.getDeployKeysForRepository({
+        githubAccessToken: accessToken,
+        repository: repo.name,
+        repositoryOwner: repo.owner,
+      });
+
+      console.log(existingDeployKeys);
+
+      // console.log(`Generating SSH deploy key for ${repo}`);
+      // const deployKey = await this.generateSshKey({
+      //   email,
+      // });
+      // console.log(`Deploy key for ${repo}: ${deployKey}`);
+      // deployKeys.push(deployKey);
     }
 
     return deployKeys;
